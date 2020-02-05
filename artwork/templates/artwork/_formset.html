@@ -1,0 +1,97 @@
+<style type="text/css">
+    .artwork-card-container {
+       margin: -0.25rem -0.25rem 0 -0.25rem;
+    }
+
+    @media (max-width: 439.98px) { .artwork-card-col { width: 50% } }
+    @media (min-width: 440px) and (max-width: 539.98px) { .artwork-card-col { width: 33% } }
+    @media (min-width: 540px) and (max-width: 679.98px) { .artwork-card-col { width: 25% } }
+    @media (min-width: 680px) and (max-width: 839.98px) { .artwork-card-col { width: 20% } }
+    @media (min-width: 840px) and (max-width: 1199.98px) { .artwork-card-col { width: 16.66% } }
+    @media (min-width: 1200px) { .artwork-card-col { width: 14.28% } }
+    
+    .artwork-card-img {
+        object-fit: cover;
+        height: 225px;
+        font-size:2rem;
+    }
+</style>
+{% if formset.non_form_errors %}
+    {% for error in formset.non_form_errors %}
+        <div class="alert alert-danger">
+            <strong>Error:</strong> {{ error|escape }}
+        </div>
+    {% endfor %}
+{% endif %}
+{{ formset.management_form }}
+<div class="d-flex flex-wrap artwork-card-container">
+{% for form in formset %}
+    {% if form.instance.id %}
+        <div class="artwork-card-col p-1">
+            <div class="card text-center">
+                {% include 'artwork/_thumb.html' with object=form.instance css='img-fluid card-img-top artwork-card-img' only %}
+                <div class="card-img-overlay py-0 px-2" title="Active">
+                    <div class="form-check text-right">
+                        <input type="radio" name="active" value="{{ form.instance.id }}" class="form-check-input position-static"{% if object.artwork_active.id == form.instance.id %} checked{% endif %} />
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% for hidden in form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                    <div class="form-group m-0"><div class="form-check">
+                    {% with field=form.DELETE %}
+                        <input type="checkbox" name="{{ field.html_name }}" class="form-check-input" id="{{ field.id_for_label }}">
+                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% endwith %}
+                    </div></div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+</div>
+        <div class="form-row">
+            {% for field in form.visible_fields %}
+                {% if field != form.DELETE %}
+                    <div class="col-sm-6"><label>{{ field.label }}</label></div>
+                {% endif %}
+            {% endfor %}
+            {% for field in comment_form.visible_fields %}
+                <div class="col-sm-6"><label>{{ field.label }}</label></div>
+            {% endfor %}
+        </div>
+        <div class="form-row{% if forloop.last %} mb-3{% endif %}">
+            {% for field in form.visible_fields %}
+                {% if field != form.DELETE %}
+                    <div class="col-sm-6">
+                        {% if forloop.first %}
+                            {% for hidden in form.hidden_fields %}
+                                {{ hidden }}
+                            {% endfor %}
+                        {% endif %}
+                        <input type="file" name="{{ field.html_name }}" accept="image/*" class="form-control-file{% if field.errors %} is-invalid{% endif %}" id="{{ field.id_for_label }}">
+                        {% if field.errors %}
+                            <div class="invalid-feedback">
+                            {% for error in field.errors %}
+                                {{ error|escape }}
+                            {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            {% endfor %}
+            {% for field in comment_form.visible_fields %}
+                <div class="col-sm-6">
+                    <input type="text" name="{{ field.html_name }}" class="form-control{% if field.errors %} is-invalid{% endif %}" placeholder="{{ field.label }}" id="{{ field.id_for_label }}">
+                    {% if field.errors %}
+                        <div class="invalid-feedback">
+                        {% for error in field.errors %}
+                            {{ error|escape }}
+                        {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endfor %}
