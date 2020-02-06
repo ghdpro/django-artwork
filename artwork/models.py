@@ -61,7 +61,7 @@ class ArtworkModel(models.Model):
     ARTWORK_SIZES = (1200, )
 
     def __str__(self):
-        return str(Path(self.image.path).name)
+        return str(Path(self.image.path if hasattr(self.image, 'path') else self.image).name)
 
     def sub_folder(self):
         # Child classes need to override this function
