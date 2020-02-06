@@ -18,27 +18,28 @@ def artwork_upload_location(instance, filename):
                     slugify(Path(filename).stem[:FILENAME_MAX_LENGTH])).with_suffix('.jpg'))
 
 
-def get_artwork_size(size) -> str:
-    # Returns an Image Magick geometry string (see https://imagemagick.org/script/command-line-processing.php#geometry)
-    if isinstance(size, int):
-        return f'{size}x{size}'
-    if isinstance(size, tuple) and len(size) >= 2:
-        return f'{size[0]}x{size[1]}'
-    # Else: assume already properly formatted geometry string
-    return size
+def get_artwork_size(size) -> int:
+    # Returns `width` aspect from size, regardless whether `size` is an int or a tuple
+    if not isinstance(size, tuple):
+        size = (size, size)
+    return size[0]
 
 
 def artwork_convert(image, dest: str, size, method: str = 'resize') -> bool:
-    cmd = ['magick', 'convert', image.path + '[0]']  # Use only first frame for animated images (ie: GIFs)
-    # Resize in "Lab" colorspace using Lanczos filter. See: http://www.imagemagick.org/Usage/resize/#resize_lab
-    cmd += ['-colorspace', 'Lab', '-filter', 'Lanczos', f'-{method}', get_artwork_size(size), '-colorspace', 'sRGB']
-    cmd += ['-strip']  # strip: remove profiles like EXIF (may contain sensitive GPS information)
+    # Determine geometry and width
     if isinstance(size, int):
+        geometry = f'{size}x{size}'
         width = size
     elif isinstance(size, tuple):
+        geometry = f'{size[0]}x{size[1]}'
         width = size[0]
     else:  # Assume original image
+        geometry = size
         width = image.width
+    cmd = ['magick', 'convert', image.path + '[0]']  # Use only first frame for animated images (ie: GIFs)
+    # Resize in "Lab" colorspace using Lanczos filter. See: http://www.imagemagick.org/Usage/resize/#resize_lab
+    cmd += ['-colorspace', 'Lab', '-filter', 'Lanczos', f'-{method}', geometry, '-colorspace', 'sRGB']
+    cmd += ['-strip']  # strip: remove profiles like EXIF (may contain sensitive GPS information)
     if width <= THUMB_SIZE:
         cmd += ['-unsharp', '0x.5', '-quality', str(THUMB_QUALITY)]
     else:
@@ -63,21 +64,20 @@ class ArtworkModel(models.Model):
         return str(Path(self.image.path).name)
 
     def sub_folder(self):
-        # Child classes should override this function
+        # Child classes need to override this function
         raise NotImplementedError
 
     def get_image_path(self, size) -> str:
         """Returns the (local) file path for the image"""
-        width = size if isinstance(size, int) else size[0]  # else: assume size is a tuple
-        return str(Path(Path(self.image.path).parent, Path(self.image.path).stem + f'-{width}w.jpg'))
+        return str(Path(Path(self.image.path).parent, Path(self.image.path).stem + f'-{get_artwork_size(size)}w.jpg'))
 
     def get_image_url(self, size) -> str:
         """Returns the URL for the image"""
-        width = size if isinstance(size, int) else size[0]  # else: assume size is a tuple
-        return str(Path(Path(self.image.url).parent, Path(self.image.url).stem + f'-{width}w.jpg'))
+        return str(Path(Path(self.image.url).parent, Path(self.image.url).stem + f'-{get_artwork_size(size)}w.jpg'))
 
     def get_image_src(self):
         """Returns the URL for the default image (for 'src' attribute)"""
+        # Tip: override this function to return sizes other than the first entry in ARTWORK_SIZES
         return self.get_image_url(self.ARTWORK_SIZES[0])
 
     def get_image_srcset(self):
