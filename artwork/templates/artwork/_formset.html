@@ -3,12 +3,15 @@
        margin: -0.25rem -0.25rem 0 -0.25rem;
     }
 
-    @media (max-width: 439.98px) { .artwork-card-col { width: 50% } }
-    @media (min-width: 440px) and (max-width: 539.98px) { .artwork-card-col { width: 33% } }
-    @media (min-width: 540px) and (max-width: 679.98px) { .artwork-card-col { width: 25% } }
-    @media (min-width: 680px) and (max-width: 839.98px) { .artwork-card-col { width: 20% } }
-    @media (min-width: 840px) and (max-width: 1199.98px) { .artwork-card-col { width: 16.66% } }
-    @media (min-width: 1200px) { .artwork-card-col { width: 14.28% } }
+    @media (max-width: 575.98px) { .artwork-card-col { width: 50% } }
+    @media (min-width: 576px) and (max-width: 767.98px) { .artwork-card-col { width: 33% } }
+    @media (min-width: 768px) and (max-width: 991.98px) { .artwork-card-col { width: 25% } }
+    @media (min-width: 992px) and (max-width: 1199.98px) { .artwork-card-col { width: 20% } }
+    @media (min-width: 1200px) { .artwork-card-col { width: 16.66% } }
+
+    .artwork-card-col:hover > div {
+        border-color: #6C757D;
+    }
     
     .artwork-card-img {
         object-fit: cover;
@@ -50,7 +53,7 @@
         </div>
     {% else %}
 </div>
-        <div class="form-row">
+        <div class="form-row mt-3">
             {% for field in form.visible_fields %}
                 {% if field != form.DELETE %}
                     <div class="col-sm-6"><label>{{ field.label }}</label></div>
