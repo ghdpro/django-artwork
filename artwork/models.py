@@ -94,5 +94,33 @@ class ArtworkModel(models.Model):
             for size in self.ARTWORK_SIZES:
                 artwork_convert(self.image, self.get_image_path(size), size, 'thumbnail')
 
+    def delete(self, *args, **kwargs):
+        storage, path = self.image.storage, self.image.path
+        super().delete(*args, **kwargs)
+        # Delete original image
+        try:
+            storage.delete(path)
+            logger.info(f'Artwork: deleted file "{path}"')
+        except FileNotFoundError:
+            logger.warning(f'Artwork: attempt to delete file "{path}" failed: file not found')
+        # Delete thumbnails
+        for size in self.ARTWORK_SIZES:
+            file = self.get_image_path(size)
+            try:
+                storage.delete(file)
+                logger.info(f'Artwork: deleted file "{file}"')
+            except FileNotFoundError:
+                logger.warning(f'Artwork: attempt to delete file "{file}" failed: file not found')
+        # Delete related folders
+        sub_folder = Path(path).parent
+        artwork_folder = sub_folder.parent
+        try:
+            sub_folder.rmdir()
+            logger.info(f'Artwork: deleted folder "{sub_folder}"')
+            artwork_folder.rmdir()
+            logger.info(f'Artwork: deleted folder "{artwork_folder}"')
+        except OSError:
+            pass
+
     class Meta:
         abstract = True
