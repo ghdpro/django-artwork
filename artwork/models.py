@@ -60,12 +60,21 @@ class ArtworkModel(models.Model):
     ARTWORK_FOLDER = 'artwork'
     ARTWORK_SIZES = (1200, )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set from settings if not already set (local override)
+        if not hasattr(self, 'IMAGE_MAX_SIZE'):
+            self.IMAGE_MAX_SIZE = IMAGE_MAX_SIZE
+
     def __str__(self):
         return str(Path(self.image.path if hasattr(self.image, 'path') else self.image).name)
 
     def sub_folder(self):
         # Child classes need to override this function
         raise NotImplementedError
+
+    def is_respsonive(self):
+        return self.ARTWORK_SIZES is not None
 
     def get_image_path(self, size) -> str:
         """Returns the (local) file path for the image"""
@@ -87,8 +96,8 @@ class ArtworkModel(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         # Force original uploaded image to comply to specified image dimensions (if set)
-        if isinstance(IMAGE_MAX_SIZE, str):
-            artwork_convert(self.image, self.image.path, IMAGE_MAX_SIZE)
+        if isinstance(self.IMAGE_MAX_SIZE, str):
+            artwork_convert(self.image, self.image.path, self.IMAGE_MAX_SIZE)
         # Alternative image sizes
         if isinstance(self.ARTWORK_SIZES, tuple):
             for size in self.ARTWORK_SIZES:
@@ -103,14 +112,15 @@ class ArtworkModel(models.Model):
             logger.info(f'Artwork: deleted file "{path}"')
         except FileNotFoundError:
             logger.warning(f'Artwork: attempt to delete file "{path}" failed: file not found')
-        # Delete thumbnails
-        for size in self.ARTWORK_SIZES:
-            file = self.get_image_path(size)
-            try:
-                storage.delete(file)
-                logger.info(f'Artwork: deleted file "{file}"')
-            except FileNotFoundError:
-                logger.warning(f'Artwork: attempt to delete file "{file}" failed: file not found')
+        # Delete alternative image sizes
+        if isinstance(self.ARTWORK_SIZES, tuple):
+            for size in self.ARTWORK_SIZES:
+                file = self.get_image_path(size)
+                try:
+                    storage.delete(file)
+                    logger.info(f'Artwork: deleted file "{file}"')
+                except FileNotFoundError:
+                    logger.warning(f'Artwork: attempt to delete file "{file}" failed: file not found')
         # Delete related folders
         sub_folder = Path(path).parent
         artwork_folder = sub_folder.parent

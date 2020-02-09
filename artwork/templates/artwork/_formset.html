@@ -33,8 +33,8 @@
         <div class="artwork-card-col p-1">
             <div class="card text-center">
                 {% include 'artwork/_thumb.html' with object=form.instance css='img-fluid card-img-top artwork-card-img' only %}
-                <div class="card-img-overlay py-0 px-2" title="Active">
-                    <div class="form-check text-right">
+                <div class="card-img-overlay py-0 px-2">
+                    <div class="form-check text-right" title="{% if object.artwork_active.id == form.instance.id %}Active{% else %}Inactive{% endif %}">
                         <input type="radio" name="active" value="{{ form.instance.id }}" class="form-check-input position-static"{% if object.artwork_active.id == form.instance.id %} checked{% endif %} />
                     </div>
                 </div>

@@ -1,2 +1,2 @@
 {# Despite the thumbnail typically not being more than 150px wide, we specify `sizes=250px` here because the cards are 225px tall and  `object-fit: cover` might "zoom in" the image a bit #}
-<img src="{{ object.get_image_src }}" srcset="{{ object.get_image_srcset }}" sizes="250px"  class="{{ css }}" alt="{{ object }}" />
+<img {% if object.is_responsive %}src="{{ object.get_image_src }}" srcset="{{ object.get_image_srcset }}" sizes="250px"{% else %}src="{{ object.image.url }}"{% endif %} class="{{ css }}" alt="{{ object }}" />
