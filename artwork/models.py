@@ -73,7 +73,7 @@ class ArtworkModel(models.Model):
         # Child classes need to override this function
         raise NotImplementedError
 
-    def is_respsonive(self):
+    def is_responsive(self):
         return self.ARTWORK_SIZES is not None
 
     def get_image_path(self, size) -> str:
