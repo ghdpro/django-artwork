@@ -1,5 +1,6 @@
 """django-artwork models"""
 
+from abc import abstractmethod
 import logging
 import subprocess
 from pathlib import Path
@@ -69,9 +70,10 @@ class ArtworkModel(models.Model):
     def __str__(self):
         return str(Path(self.image.path if hasattr(self.image, 'path') else self.image).name)
 
+    @abstractmethod
     def sub_folder(self):
         # Child classes need to override this function
-        raise NotImplementedError
+        pass
 
     def is_responsive(self):
         return self.ARTWORK_SIZES is not None
