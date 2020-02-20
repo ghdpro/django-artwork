@@ -37,7 +37,8 @@ def artwork_convert(image, dest: str, size, method: str = 'resize') -> bool:
     else:  # Assume original image
         geometry = size
         width = image.width
-    cmd = ['magick', 'convert', image.path + '[0]']  # Use only first frame for animated images (ie: GIFs)
+    cmd = ['convert', ]
+    cmd += [image.path + '[0]']  # Use only first frame for animated images (ie: GIFs)
     # Resize in "Lab" colorspace using Lanczos filter. See: http://www.imagemagick.org/Usage/resize/#resize_lab
     cmd += ['-colorspace', 'Lab', '-filter', 'Lanczos', f'-{method}', geometry, '-colorspace', 'sRGB']
     cmd += ['-strip']  # strip: remove profiles like EXIF (may contain sensitive GPS information)
