@@ -1,0 +1,19 @@
+.artwork-card-container {
+   margin: -0.25rem -0.25rem 0 -0.25rem;
+}
+
+@media (max-width: 575.98px) { .artwork-card-col { width: 50% } }
+@media (min-width: 576px) and (max-width: 767.98px) { .artwork-card-col { width: 33% } }
+@media (min-width: 768px) and (max-width: 991.98px) { .artwork-card-col { width: 25% } }
+@media (min-width: 992px) and (max-width: 1199.98px) { .artwork-card-col { width: 20% } }
+@media (min-width: 1200px) { .artwork-card-col { width: 16.66% } }
+
+.artwork-card-col:hover > div {
+    border-color: #6C757D;
+}
+
+.artwork-card-img {
+    object-fit: cover;
+    height: 225px;
+    font-size:2rem;
+}
